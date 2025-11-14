@@ -1,0 +1,13 @@
+streamlit
+gspread
+google-auth==2.31.0
+google-auth-oauthlib
+google-auth-httplib2
+google-cloud-storage==2.16.0
+google-api-core>=2.19.0
+reportlab
+pandas
+requests
+sendgrid
+qrcode
+pillow

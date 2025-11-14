@@ -1,0 +1,168 @@
+============================================================
+🌐 CONFIGURACIÓN DNS EN SITEGROUND
+============================================================
+Dominio: app.aestheticsafe.com
+Destino: Replit (AestheticSafe V3.1)
+============================================================
+
+📍 UBICACIÓN EN SITEGROUND:
+
+Websites → Site Tools → Domain → DNS Zone Editor
+Dominio: aestheticsafe.com
+
+============================================================
+
+🗑️ PASO 1: ELIMINAR REGISTROS ANTIGUOS
+
+Buscar y ELIMINAR cualquier registro antiguo de Google Cloud:
+
+✗ Registro A con host "app" (IP de Google Cloud)
+✗ Registro CNAME con host "app"
+✗ Cualquier registro TXT relacionado con app.aestheticsafe.com
+
+============================================================
+
+➕ PASO 2: AGREGAR NUEVOS REGISTROS DE REPLIT
+
+Copiar estos dos registros (reemplazar los valores con los de Replit):
+
+───────────────────────────────────────────────────────────
+REGISTRO 1: IP (Tipo A)
+───────────────────────────────────────────────────────────
+Type:     A
+Host:     app
+Points to: [COPIAR_IP_DE_REPLIT_AQUÍ]
+TTL:      3600 (o Auto)
+
+Ejemplo real:
+Points to: 35.190.123.45
+
+───────────────────────────────────────────────────────────
+REGISTRO 2: Verificación (Tipo TXT)
+───────────────────────────────────────────────────────────
+Type:  TXT
+Host:  _replit-challenge.app
+Value: [COPIAR_TOKEN_DE_REPLIT_AQUÍ]
+TTL:   3600 (o Auto)
+
+Ejemplo real:
+Value: abc123def456ghi789jkl012mno345pqr678
+
+============================================================
+
+📋 CÓMO OBTENER LOS VALORES DE REPLIT:
+
+1. Abrir tu proyecto AestheticSafe en Replit
+2. Click en "Publish" (botón superior derecho)
+3. Ir a: Deployments → Settings → Domains
+4. Click: "Link a domain"
+5. Ingresar: app.aestheticsafe.com
+6. Replit mostrará los valores exactos:
+   
+   ┌─────────────────────────────────────────┐
+   │ Add these DNS records:                  │
+   │                                         │
+   │ Type: A                                 │
+   │ Name: app                               │
+   │ Value: [IP_AQUÍ] ← COPIAR              │
+   │                                         │
+   │ Type: TXT                               │
+   │ Name: _replit-challenge.app             │
+   │ Value: [TOKEN_AQUÍ] ← COPIAR           │
+   └─────────────────────────────────────────┘
+
+7. Copiar esos valores y pegarlos en SiteGround
+
+============================================================
+
+✅ PASO 3: GUARDAR Y VERIFICAR
+
+1. Click "Save" en SiteGround
+2. Esperar 15-60 minutos (propagación DNS)
+3. Verificar en terminal:
+
+   nslookup app.aestheticsafe.com
+
+   Debe mostrar la IP de Replit (no la de Google Cloud)
+
+4. Abrir navegador:
+
+   https://app.aestheticsafe.com
+
+   Debe cargar AestheticSafe V3.1 con:
+   ✓ Splash screen "AestheticSafe®"
+   ✓ Formulario de evaluación
+   ✓ HTTPS activo (candado verde)
+
+============================================================
+
+⏱️ TIEMPOS ESPERADOS:
+
+- Configuración en SiteGround: 5 minutos
+- Propagación DNS inicial: 15-30 minutos
+- Propagación DNS completa: 1-2 horas (máx 24h)
+- Verificación en Replit: Mostrará "Verified" cuando esté activo
+
+============================================================
+
+🔧 TROUBLESHOOTING:
+
+Problema: DNS no actualiza después de 2 horas
+Solución: 
+- Verificar que ambos registros (A y TXT) estén correctos
+- Probar: nslookup app.aestheticsafe.com 8.8.8.8
+- Limpiar cache DNS local: ipconfig /flushdns (Windows)
+
+Problema: Replit no verifica el dominio
+Solución:
+- Confirmar que el TXT record esté exactamente como Replit indica
+- Verificar que no haya espacios extra en el valor TXT
+- Esperar más tiempo (hasta 24h en casos raros)
+
+Problema: Navegador muestra "Not Secure" o error SSL
+Solución:
+- Esperar a que Replit emita certificado SSL (automático)
+- Puede tardar 10-30 min después de verificación DNS
+- Refrescar navegador con Ctrl+Shift+R
+
+============================================================
+
+📞 SOPORTE:
+
+Si necesitás ayuda:
+- SiteGround Support Chat (para DNS)
+- Replit Support (para verificación de dominio)
+
+============================================================
+
+🎯 CHECKLIST FINAL:
+
+Antes de cerrar SiteGround, verificar:
+[ ] Registro A agregado (host: app, value: IP de Replit)
+[ ] Registro TXT agregado (host: _replit-challenge.app)
+[ ] Registros antiguos de Google Cloud eliminados
+[ ] Cambios guardados ("Save")
+
+Después de propagación DNS:
+[ ] nslookup muestra IP de Replit
+[ ] Replit muestra dominio "Verified"
+[ ] https://app.aestheticsafe.com carga V3.1
+[ ] HTTPS/TLS activo (candado verde)
+[ ] Splash screen aparece correctamente
+[ ] PDF v3.1 funciona
+[ ] Email delivery funciona
+[ ] Google Sheets logging activo
+
+============================================================
+
+✅ RESULTADO FINAL:
+
+app.aestheticsafe.com → AestheticSafe V3.1 (Replit)
+app.aestheticsafe.com.ar → V2 Demo
+V1 en Google Cloud → Backup (sin dominio)
+
+============================================================
+
+Última actualización: 2025-11-04
+AestheticSafe V3.1 - Production Ready
+============================================================

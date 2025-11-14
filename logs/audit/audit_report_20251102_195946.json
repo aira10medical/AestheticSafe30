@@ -1,0 +1,227 @@
+{
+    "metadata": {
+        "version": "3.1",
+        "timestamp": "2025-11-02T19:59:46.753192",
+        "mode": "full",
+        "audit_manager": "audit_manager.py"
+    },
+    "technical": [
+        {
+            "check": "Module: streamlit",
+            "status": "\u2705 OK",
+            "details": "Web framework",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:36.155474"
+        },
+        {
+            "check": "Module: gspread",
+            "status": "\u2705 OK",
+            "details": "Google Sheets integration",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:36.757930"
+        },
+        {
+            "check": "Module: reportlab",
+            "status": "\u2705 OK",
+            "details": "PDF generation",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:36.762342"
+        },
+        {
+            "check": "Module: google.auth",
+            "status": "\u2705 OK",
+            "details": "GCP authentication",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:36.762359"
+        },
+        {
+            "check": "Module: sendgrid",
+            "status": "\u2705 OK",
+            "details": "Email delivery",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:37.119947"
+        },
+        {
+            "check": "Module: pandas",
+            "status": "\u2705 OK",
+            "details": "Data processing",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:46.738262"
+        },
+        {
+            "check": "Environment: GOOGLE_CREDENTIALS",
+            "status": "\u2705 SET",
+            "details": "GCP service account",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:46.738419"
+        },
+        {
+            "check": "Environment: SENDGRID_API_KEY",
+            "status": "\u2705 SET",
+            "details": "Email service (optional)",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:46.738428"
+        },
+        {
+            "check": "File: calculadora.py",
+            "status": "\u2705 PRESENT",
+            "details": "",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:46.738575"
+        },
+        {
+            "check": "File: pdf_generator_v3_1.py",
+            "status": "\u2705 PRESENT",
+            "details": "",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:46.738642"
+        },
+        {
+            "check": "File: gsheets.py",
+            "status": "\u2705 PRESENT",
+            "details": "",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:46.738709"
+        },
+        {
+            "check": "File: app.py",
+            "status": "\u2705 PRESENT",
+            "details": "",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:46.738824"
+        },
+        {
+            "check": "Splash Screen",
+            "status": "\u2705 OK",
+            "details": "Pure white (#ffffff) splash screen implemented",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:46.739970"
+        },
+        {
+            "check": "Language Detection",
+            "status": "\u2705 OK",
+            "details": "Auto-detection from browser + URL override",
+            "category": "technical",
+            "timestamp": "2025-11-02T19:59:46.740958"
+        }
+    ],
+    "compliance": [
+        {
+            "check": "HTTPS Encryption",
+            "status": "\u2705 OK",
+            "details": "Replit provides TLS for 0c70348a-ea6b-46db-8647-519c74f1987a-00-3jveqpwrmmc2a.picard.replit.dev",
+            "category": "compliance",
+            "timestamp": "2025-11-02T19:59:46.741233"
+        },
+        {
+            "check": "TLS Data Encryption",
+            "status": "\u2705 OK",
+            "details": "Streamlit + Replit TLS 1.2+",
+            "category": "compliance",
+            "timestamp": "2025-11-02T19:59:46.741242"
+        },
+        {
+            "check": "PHI Redaction Layer",
+            "status": "\u26a0\ufe0f NEEDS INTEGRATION",
+            "details": "redact_phi.py exists but not integrated",
+            "category": "compliance",
+            "timestamp": "2025-11-02T19:59:46.741670"
+        },
+        {
+            "check": "GCP Authentication",
+            "status": "\u2705 SECURE",
+            "details": "Service account credentials via environment",
+            "category": "compliance",
+            "timestamp": "2025-11-02T19:59:46.741738"
+        },
+        {
+            "check": "Access Control",
+            "status": "\u2705 OK",
+            "details": "Service account with minimal permissions",
+            "category": "compliance",
+            "timestamp": "2025-11-02T19:59:46.741758"
+        },
+        {
+            "check": "Data Retention",
+            "status": "\u2705 DOCUMENTED",
+            "details": "V3 Google Sheets with backup strategy",
+            "category": "compliance",
+            "timestamp": "2025-11-02T19:59:46.741762"
+        },
+        {
+            "check": "Audit Logging",
+            "status": "\u2705 ACTIVE",
+            "details": "This audit_manager.py module",
+            "category": "compliance",
+            "timestamp": "2025-11-02T19:59:46.741765"
+        },
+        {
+            "check": "BAA with Google Cloud",
+            "status": "\u26a0\ufe0f REQUIRED",
+            "details": "Must be signed before HIPAA production use",
+            "category": "compliance",
+            "timestamp": "2025-11-02T19:59:46.741772"
+        },
+        {
+            "check": "Patient Consent Forms",
+            "status": "\u2705 IMPLEMENTED",
+            "details": "Consent checkboxes present",
+            "category": "compliance",
+            "timestamp": "2025-11-02T19:59:46.744812"
+        }
+    ],
+    "integrity": [
+        {
+            "check": "Integrity: calculadora.py",
+            "status": "\u2705 VERIFIED",
+            "details": "SHA256=a21933e16590a865... (162634 bytes)",
+            "category": "integrity",
+            "timestamp": "2025-11-02T19:59:46.746133"
+        },
+        {
+            "check": "Integrity: pdf_generator_v3_1.py",
+            "status": "\u2705 VERIFIED",
+            "details": "SHA256=cc0d57f89518b14b... (11434 bytes)",
+            "category": "integrity",
+            "timestamp": "2025-11-02T19:59:46.747543"
+        },
+        {
+            "check": "Integrity: gsheets.py",
+            "status": "\u2705 VERIFIED",
+            "details": "SHA256=8e099ea0e2eb05fa... (7984 bytes)",
+            "category": "integrity",
+            "timestamp": "2025-11-02T19:59:46.748421"
+        },
+        {
+            "check": "Integrity: app.py",
+            "status": "\u2705 VERIFIED",
+            "details": "SHA256=70d51eabe5c8a880... (22877 bytes)",
+            "category": "integrity",
+            "timestamp": "2025-11-02T19:59:46.750059"
+        },
+        {
+            "check": "Integrity: email_utils.py",
+            "status": "\u2705 VERIFIED",
+            "details": "SHA256=2fe01f8ca31757d8... (3925 bytes)",
+            "category": "integrity",
+            "timestamp": "2025-11-02T19:59:46.751474"
+        },
+        {
+            "check": "Code Size: calculadora.py",
+            "status": "\u2705 OK",
+            "details": "4215 lines",
+            "category": "integrity",
+            "timestamp": "2025-11-02T19:59:46.753069"
+        }
+    ],
+    "summary": {
+        "total_checks": 29,
+        "technical_checks": 14,
+        "compliance_checks": 9,
+        "integrity_checks": 6,
+        "critical_failures": 0,
+        "warnings": 2,
+        "passed": 27
+    },
+    "signature": "6fb57474c9921363107385d00556ef15468e3786ad2737977c784fcbfbdc1b1e"
+}

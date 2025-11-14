@@ -1,0 +1,95 @@
+============================================================
+🚀 COMANDOS RÁPIDOS - MIGRACIÓN AESTHETICSAFE
+============================================================
+
+📋 COPIAR/PEGAR EN GOOGLE CLOUD SHELL:
+
+# 1. Verificar proyecto actual
+gcloud config get-value project
+
+# 2. Ver dominios mapeados
+gcloud app domain-mappings list
+
+# 3. Liberar app.aestheticsafe.com (SIN borrar servicios)
+gcloud app domain-mappings delete app.aestheticsafe.com
+
+# 4. Verificar que se liberó
+gcloud app domain-mappings list
+
+# 5. Verificar DNS (debe dar NXDOMAIN o error)
+nslookup app.aestheticsafe.com
+
+============================================================
+
+📝 DESPUÉS EN REPLIT (V3.1):
+
+1. Click "Publish" (si no está publicado)
+2. Ir a: Deployments → Settings → Custom Domain
+3. Click: "Link a domain"
+4. Ingresar: app.aestheticsafe.com
+5. Copiar registros DNS que Replit muestra:
+   - Registro A (Type: A, Name: app, Value: [IP])
+   - Registro TXT (Type: TXT, Name: _replit-challenge.app)
+
+============================================================
+
+🌐 DESPUÉS EN DONWEB/CLOUDFLARE:
+
+Agregar/Modificar estos registros DNS:
+
+Type: A
+Name: app (o @)
+Value: [IP copiada de Replit]
+TTL: 300 o Auto
+
+Type: TXT
+Name: _replit-challenge.app
+Value: [código copiado de Replit]
+TTL: 300 o Auto
+
+Guardar cambios.
+
+============================================================
+
+⏱️ TIEMPOS:
+
+- Liberación dominio Google Cloud: Inmediato
+- Propagación DNS inicial: 10-30 minutos
+- Propagación DNS completa: 1-2 horas (máx 24h)
+- Verificación en Replit: Aparece "Verified" cuando está listo
+
+============================================================
+
+✅ VERIFICACIÓN FINAL:
+
+Abrir: https://app.aestheticsafe.com
+
+Debe mostrar:
+✓ Splash screen AestheticSafe®
+✓ Formulario de evaluación
+✓ PDF v3.1 con horizontal colored bars
+✓ Email delivery funcionando
+✓ Google Sheets logging activo
+✓ Emoji feedback system
+✓ HTTPS/TLS activo (candado verde)
+
+============================================================
+
+⚠️ IMPORTANTE:
+
+- V1 NO se borra (queda en Google Cloud como backup)
+- Solo se libera el dominio
+- Los servicios de Google Cloud siguen funcionando
+- Podés hacer rollback en cualquier momento
+
+============================================================
+
+🔄 ROLLBACK (si algo falla):
+
+# Volver a mapear dominio en Google Cloud:
+gcloud app domain-mappings create app.aestheticsafe.com
+
+# O cambiar DNS temporalmente a V2:
+# Apuntar app.aestheticsafe.com → app.aestheticsafe.com.ar
+
+============================================================
