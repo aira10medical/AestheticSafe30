@@ -11,6 +11,17 @@ from calculadora import calculadora
 from gsheets import append_row_safe, utc_now_str, service_account_email
 APP_VERSION = "v1.1"
 LOG_TAB = "Calculadora_Evaluaciones"
+from openai import OpenAI
+import os
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def obtener_respuesta_ia(pregunta):
+    response = client.responses.create(
+        model="gpt-5.1-mini",
+        input=pregunta
+    )
+    return response.output_text
 
 
 def vista_calculadora_pi():
