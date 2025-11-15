@@ -534,6 +534,50 @@ def vista_paciente_es():
 
         except Exception as e:
             st.error(f"❌ Error inesperado al guardar: {type(e).__name__}: {e}")
+            
+    # =========================================================
+    # 🧠 ASISTENTE IA – GPT-5.1-mini
+    # =========================================================
+    st.markdown("---")
+    st.subheader("Asistente IA — Consultas Médicas Generales")
+
+    st.markdown(
+        "Podés hacer preguntas sobre el procedimiento, riesgos, preparación "
+        "y cualquier duda relacionada. Este asistente **no reemplaza** una consulta médica presencial."
+    )
+
+    with st.form("form_asistente_ia"):
+        pregunta_ia = st.text_area(
+            "Escribí tu pregunta:",
+            placeholder="Ejemplo: ¿Qué significa tener riesgo moderado en cirugía estética?",
+            height=130
+        )
+        enviar_ia = st.form_submit_button("💬 Preguntar al Asistente IA")
+
+    if enviar_ia:
+        if not pregunta_ia.strip():
+            st.warning("Por favor escribí una pregunta antes de continuar.")
+        else:
+            with st.spinner("Consultando a GPT-5.1-mini..."):
+                try:
+                    respuesta = client.responses.create(
+                        model="gpt-5.1-mini",
+                        input=(
+                            "Actúa como un asistente médico experto en cirugía plástica estética. "
+                            "Proporciona respuestas claras, concisas, en español, "
+                            "y evita cualquier acto médico directo.\n\n"
+                            f"Pregunta del usuario: {pregunta_ia}"
+                        )
+                    )
+                    st.success("Respuesta del asistente:")
+                    st.write(respuesta.output_text)
+
+                except Exception as e:
+                    st.error(
+                        "Ocurrió un error al consultar el modelo de OpenAI. "
+                        "Por favor intentá de nuevo más tarde."
+                    )
+
 # ============ ROUTER (sin sidebar, con diagnóstico) ============
 # Ocultar sidebar y botón de colapso
 st.markdown("""
