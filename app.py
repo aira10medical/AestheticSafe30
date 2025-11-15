@@ -5,8 +5,8 @@
 app.py — Shell mínimo para AestheticSafe en Streamlit/Railway
 
 - Mantiene toda la lógica actual en calculadora.calculadora()
-- No incluye el chat en el sidebar; SAFE-MD se renderiza como chat flotante fijo abajo.
-- No toca la implementación interna de calculadora.py
+- SAFE-MD se renderiza como chat flotante fijo abajo (safe_chat_bottom.py)
+- No toca calculadora.py
 """
 
 import os
@@ -21,21 +21,16 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 # ==========================
-# 🧠 (Helper functions preserved — no UI sidebar)
+# 🧠 Helper functions (se conservan para compatibilidad)
 # ==========================
 def _ensure_chat_state():
-    """Inicializa el historial de chat en sesión."""
     if "safe_chat_history" not in st.session_state:
-        st.session_state["safe_chat_history"] = []  # lista de dicts {role, content}
+        st.session_state["safe_chat_history"] = []
     if "safe_chat_files" not in st.session_state:
         st.session_state["safe_chat_files"] = []
 
 
 def _call_safe_md_assistant(question: str, files_context: str = "") -> str:
-    """
-    Llama a GPT-5.1-mini con un prompt médico controlado.
-    No da órdenes médicas directas, responde en lenguaje claro y prudente.
-    """
     base_prompt = (
         "Actuás como un asistente médico virtual especializado en cirugía plástica estética. "
         "Respondé en español, con lenguaje claro, empático y profesional. "
@@ -46,11 +41,7 @@ def _call_safe_md_assistant(question: str, files_context: str = "") -> str:
     if files_context:
         base_prompt += f"Información sobre archivos adjuntos del paciente:\n{files_context}\n\n"
 
-    full_input = (
-        base_prompt
-        + "Pregunta actual del paciente:\n"
-        + question
-    )
+    full_input = base_prompt + "Pregunta actual del paciente:\n" + question
 
     try:
         response = client.responses.create(
@@ -59,11 +50,9 @@ def _call_safe_md_assistant(question: str, files_context: str = "") -> str:
         )
         return response.output_text
     except Exception as e:
-        # Falla segura: no rompe la app, solo informa el error genérico
         return (
             "Hubo un problema al consultar el asistente de IA. "
-            "Por favor, intentá de nuevo más tarde. Detalle técnico: "
-            f"{type(e).__name__}"
+            "Intentá más tarde. Detalle: " + type(e).__name__
         )
 
 
@@ -72,25 +61,21 @@ def _call_safe_md_assistant(question: str, files_context: str = "") -> str:
 # ==========================
 def main():
     st.set_page_config(
-        page_title="AestheticSafe · SAFE·MD",
+        page_title="AestheticSafe · SAFE-MD",
         page_icon="💎",
         layout="wide",
     )
 
-    # Layout tipo Copilot: izquierda app médica, derecha (removed sidebar chat)
-    col_app, col_chat = st.columns([2.2, 1])
+    col_app, col_empty = st.columns([2.2, 1])
 
     with col_app:
-        # ⬇️ Tu app actual, sin tocar calculadora.py
         calculadora()
 
-    # Nota: el sidebar de chat fue eliminado intencionalmente.
+    # --- importar y renderizar el chat flotante ---
+    from safe_chat_bottom import render_safe_chat
+    render_safe_chat()
 
 
-# Para ejecución con `python app.py` o herramientas que esperan entrypoint
+# Entry point
 if __name__ == "__main__":
     main()
-
-
-from safe_chat_bottom import render_safe_chat
-render_safe_chat()
