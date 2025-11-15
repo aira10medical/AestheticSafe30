@@ -97,7 +97,7 @@ def render_safe_chat_sidebar():
     if files:
         with st.expander("Archivos adjuntados", expanded=False):
             for f in files:
-                st.markdown(f"- `{f.name}`")
+                st.markdown(f"- `{{f.name}}`")
 
     st.markdown("---")
 
@@ -113,10 +113,10 @@ def render_safe_chat_sidebar():
         content = turn.get("content", "")
 
         if role == "user":
-            st.markdown(f"**Tú:** {content}")
+            st.markdown(f"**Tú:** {{content}}")
         else:
             # assistant
-            st.markdown(f"**SAFE·MD:** {content}")
+            st.markdown(f"**SAFE·MD:** {{content}}")
 
         st.markdown("---")
 
@@ -145,7 +145,7 @@ def render_safe_chat_sidebar():
         files = st.session_state.get("safe_chat_files", [])
         if files:
             files_context = "Archivos adjuntos del paciente:\n" + "\n".join(
-                f"- {f.name}" for f in files
+                f"- {{f.name}}" for f in files
             )
         else:
             files_context = ""
@@ -186,3 +186,7 @@ def main():
 # Para ejecución con `python app.py` o herramientas que esperan entrypoint
 if __name__ == "__main__":
     main()
+
+
+from safe_chat_bottom import render_safe_chat
+render_safe_chat()
