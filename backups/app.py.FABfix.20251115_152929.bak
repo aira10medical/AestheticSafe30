@@ -1,0 +1,282 @@
+# ruff: noqa
+# pyright: reportUnusedExpression=false
+
+# app.py — conexión robusta a Google Sheets (Secrets o credentials.json)
+import os
+import json
+import streamlit as st
+import gspread
+from google.oauth2.service_account import Credentials
+from calculadora import calculadora
+from gsheets import append_row_safe, utc_now_str, service_account_email
+APP_VERSION = "v1.1"
+LOG_TAB = "Calculadora_Evaluaciones"
+from openai import OpenAI
+import os
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def obtener_respuesta_ia(pregunta):
+    response = client.responses.create(
+        model="gpt-5.1-mini",
+        input=pregunta
+    )
+    return response.output_text
+
+
+def vista_calculadora_pi():
+    calculadora()  # <-- solo llama a calculadora(), sin título duplicado
+
+    # ==========================
+    # 🤖 ASISTENTE IA
+    # ==========================
+
+    st.markdown("## 🤖 Asistente IA")
+
+    pregunta_ia = st.text_area(
+        "Hacé una pregunta al Asistente:",
+        placeholder="Ej: ¿Qué riesgo tengo con una liposucción si tengo anemia?"
+    )
+
+    if st.button("Preguntar al Asistente IA"):
+        if pregunta_ia.strip():
+            try:
+                respuesta = obtener_respuesta_ia(pregunta_ia)
+                st.success(respuesta)
+            except Exception as e:
+                st.error("Ocurrió un error al consultar la IA.")
+                st.code(str(e))
+        else:
+            st.warning("Escribí una pregunta antes de continuar.")
+
+
+# Configuración de tu hoja
+SHEET_KEY = "12PC1-vv-RIPDDs0O07Xg0ZoAFH7H6npJSnDDpUtPkJQ"  # <-- tu ID
+WORKSHEET_TITLE = "Evaluación Estética - SAFE MD AI 25"  # <-- tu pestaña
+
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive",
+]
+
+
+def get_sheet():
+    creds_json = os.getenv("GOOGLE_CREDENTIALS")
+    if not creds_json:
+        raise RuntimeError("Falta el secret GOOGLE_CREDENTIALS en Replit")
+
+    info = json.loads(creds_json)
+    creds = Credentials.from_service_account_info(info, scopes=SCOPES)
+    gc = gspread.authorize(creds)
+    sh = gc.open_by_key(SHEET_KEY)
+    worksheet = sh.worksheet(WORKSHEET_TITLE)
+    return worksheet
+
+
+# ==== LEER DATOS ====
+def leer_datos():
+    ws = get_sheet()
+    datos = ws.get_all_values()  # Lista de listas
+    return datos
+
+
+# ==== AGREGAR FILA ====
+def agregar_fila(nueva_fila):
+    ws = get_sheet()
+    ws.append_row(nueva_fila, value_input_option="USER_ENTERED")
+    return True
+
+
+# ==== EJEMPLOS DE USO ====
+# (Código de ejemplo removido para evitar ejecución automática)
+
+# ===== UI base =====
+
+st.markdown("""
+<style>
+:root{
+  --brand-primary:#38c694; /* Low */
+  --brand-warn:#fcb960;    /* Moderate */
+  --brand-danger:#fa5f45;  /* High */
+}
+
+.main { background-color: #f7f9fc; }
+
+/* Botones */
+.stButton>button{
+  background:var(--brand-primary)!important;
+  color:#fff!important;
+  font-weight:700!important;
+  border-radius:10px!important;
+  padding:.55rem 1rem!important;
+  border:0!important;
+}
+.stButton>button:hover{ filter:brightness(.95); }
+
+/* Inputs */
+.stTextInput>div>div>input,
+.stNumberInput input, 
+.stSelectbox div[data-baseweb="select"]{
+  border-radius:10px!important;
+}
+
+/* Títulos / separadores */
+h1, h2, h3{ color:#0f172a; }
+hr{ border:none; border-top:1px solid #e5e7eb; margin:1rem 0; }
+
+/* Badges */
+.badge{
+  display:inline-block; padding:.35rem .7rem; border-radius:999px;
+  font-weight:700; font-size:.95rem;
+}
+.badge-low{ background:rgba(56,198,148,.12); color:#38c694; }
+.badge-mod{ background:rgba(252,185,96,.15); color:#fcb960; }
+.badge-high{ background:rgba(250,95,69,.15); color:#fa5f45; }
+
+/* Multiselect chips */
+[data-baseweb="tag"]{
+  border-radius:999px!important;
+  font-weight:600!important;
+  padding:0 .6rem!important;
+}
+[data-baseweb="tag"]:has(span:contains("Low")){
+  background:rgba(56,198,148,.12)!important; color:#38c694!important;
+}
+[data-baseweb="tag"]:has(span:contains("Moderate")){
+  background:rgba(252,185,96,.15)!important; color:#fcb960!important;
+}
+[data-baseweb="tag"]:has(span:contains("High")){
+  background:rgba(250,95,69,.15)!important; color:#fa5f45!important;
+}
+/* FAB styling to ensure not interfering if streamlit injects different wrappers */
+.fab-link {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  background: #38c694;
+  color: #ffffff;
+  border-radius: 50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  text-decoration:none;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  z-index: 9999;
+}
+</style>
+""",
+            unsafe_allow_html=True)
+
+# ===== Config Sheets =====
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive",
+]
+
+# 🔒 Valores fijos (tu hoja)
+SHEET_KEY = "12PC1-vv-RIPDDs0O07Xg0ZoAFH7H6npJSnDDpUtPkJQ"  # ID del doc
+WORKSHEET_TITLE = "Evaluación Estética - SAFE MD AI 25"  # pestaña
+SHEET_NAME_FALLB = os.getenv(
+    "SHEET_NAME",
+    "AestheticSafe_Respuestas").strip()  # abrir por nombre si falla el KEY
+
+
+def _load_credentials():
+    """Busca credenciales en env, luego st.secrets, luego credentials.json."""
+    creds_env = os.getenv("GOOGLE_CREDENTIALS")
+    if creds_env:
+        try:
+            info = json.loads(creds_env)
+            return Credentials.from_service_account_info(info, scopes=SCOPES)
+        except Exception as e:
+            st.error(
+                f"❌ GOOGLE_CREDENTIALS inválido en env: {type(e).__name__}: {e}"
+            )
+            return None
+
+    try:
+        if "GOOGLE_CREDENTIALS" in st.secrets:
+            info = json.loads(st.secrets["GOOGLE_CREDENTIALS"])
+            return Credentials.from_service_account_info(info, scopes=SCOPES)
+    except Exception as e:
+        st.error(
+            f"❌ GOOGLE_CREDENTIALS inválido en st.secrets: {type(e).__name__}: {e}"
+        )
+        return None
+
+    if os.path.exists("credentials.json"):
+        try:
+            return Credentials.from_service_account_file("credentials.json",
+                                                         scopes=SCOPES)
+        except Exception as e:
+            st.error(
+                f"❌ Error leyendo credentials.json: {type(e).__name__}: {e}")
+            return None
+
+    return None
+
+
+def get_sheet():
+    creds = _load_credentials()
+    if not creds:
+        return None
+
+    try:
+        gc = gspread.authorize(creds)
+    except Exception as e:
+        st.error(
+            f"❌ Error de autorización con Google Sheets: {type(e).__name__}: {e}"
+        )
+        return None
+
+    # Abrimos por KEY (preferido)
+    try:
+        ss = gc.open_by_key(SHEET_KEY)
+    except Exception:
+        # Fallback por nombre del documento
+        try:
+            ss = gc.open(SHEET_NAME_FALLB)
+        except Exception as e2:
+            st.error(
+                f"❌ No pude abrir el Spreadsheet por KEY ni por nombre ('{SHEET_NAME_FALLB}'): {type(e2).__name__}: {e2}"
+            )
+            return None
+
+    # Worksheet (pestaña)
+    try:
+        ws = ss.worksheet(WORKSHEET_TITLE)
+        return ws
+    except gspread.WorksheetNotFound:
+        # Ayuda: listar pestañas existentes
+        try:
+            tabs = [w.title for w in ss.worksheets()]
+        except Exception:
+            tabs = []
+        st.error(
+            f"❌ No encuentro la pestaña '{WORKSHEET_TITLE}'.\n"
+            f"👉 Pestañas disponibles: {tabs if tabs else '(no pude listarlas)'}"
+        )
+        return None
+    except Exception as e:
+        st.error(f"❌ Error abriendo la pestaña: {type(e).__name__}: {e}")
+        return None
+
+
+# ===== Conexión =====
+#st.write("Conectando con Google Sheets…")
+#sheet = get_sheet()
+#if sheet:
+ #   st.success("✅ Conexión exitosa con Google Sheets")
+#else:
+ #   st.warning(
+  #      "⚠️ Google Sheets no está disponible. La app #funcionará sin guardar datos."
+ #   )
+  #  st.info(
+   #     "💡 Para habilitar Google Sheets, cargá #GOOGLE_CREDENTIALS y compartí el doc con el email de la #cuenta de servicio."
+#)
+
+
+# ============== VISTAS ============== 243 lines truncated...
