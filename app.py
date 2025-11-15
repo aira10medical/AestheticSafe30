@@ -642,7 +642,7 @@ if __name__ == "__main__":
     print("=" * 60)
     
     # 🚀 Ejecutar Streamlit con configuración para Replit
-    cmd = f"streamlit run calculadora.py --server.port {port} --server.address 0.0.0.0 --server.headless true"
+    cmd = f"streamlit run app.py --server.port {port} --server.address 0.0.0.0 --server.headless true"
     print(f"📦 Ejecutando: {cmd}")
     print("✅ Preview habilitado en Replit")
     print("=" * 60)
