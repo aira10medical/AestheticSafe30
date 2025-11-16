@@ -27,7 +27,7 @@ def registrar_evento_bridge(
             str(extra) if extra else "",
         ]
 
-        ok, svc = append_row_safe(payload, tab="V3_Funnel_Progress")
+        ok, svc = append_row_safe(payload, tab="Calculadora_Evaluaciones", tab_gid=1211408350)
         return ok
     except Exception:
         return False
