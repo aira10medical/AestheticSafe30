@@ -130,6 +130,7 @@ def append_row_safe(row: List[Any], tab: str = LOG_TAB_TITLE, tab_gid: Optional[
     Además: si el destino es la pestaña principal y la fila parece un EVENTO corto,
     se descarta silenciosamente (para que sólo queden filas de calculadora.py).
     """
+    svc = None   # <-- ESTA LÍNEA ES OBLIGATORIA
 
     for attempt in range(3):
         try:
