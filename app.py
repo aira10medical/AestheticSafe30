@@ -8,6 +8,7 @@ import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
 from calculadora import calculadora
+from registro import registrar_evento
 from gsheets import append_row_safe, utc_now_str, service_account_email
 APP_VERSION = "v1.1"
 LOG_TAB = "Calculadora_Evaluaciones"
@@ -245,6 +246,15 @@ APP_VERSION = "v1.1"
 LOG_TAB = "Calculadora_Evaluaciones"
 
 def vista_paciente_es():
+    # Log funnel step1
+    registrar_evento(
+    session_id=st.session_state.get("session_id", "no-session"),
+    stage="step1",
+    substage="start",
+    user_agent=st.session_state.get("user_agent", ""),
+    country=st.session_state.get("country", "")
+    )
+
     st.header("Evaluación Estética - SAFE MD 25")
     st.markdown(
         "Por favor, completá el siguiente formulario de evaluación médica. Los campos se ajustarán según el tipo de procedimiento seleccionado."
