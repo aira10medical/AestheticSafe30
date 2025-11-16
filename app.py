@@ -8,7 +8,6 @@ import streamlit as st
 import gspread
 from google.oauth2.service_account import Credentials
 from calculadora import calculadora
-from registro import registrar_evento
 from logger_bridge import registrar_evento_bridge
 from gsheets import append_row_safe, utc_now_str, service_account_email
 APP_VERSION = "v1.1"
@@ -247,8 +246,9 @@ APP_VERSION = "v1.1"
 LOG_TAB = "Calculadora_Evaluaciones"
 
 def vista_paciente_es():
+    
     # Log funnel step1
-    registrar_evento(
+    registrar_evento_bridge(
     session_id=st.session_state.get("session_id", "no-session"),
     stage="step1",
     substage="start",
