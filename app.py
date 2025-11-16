@@ -9,6 +9,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 from calculadora import calculadora
 from registro import registrar_evento
+from logger_bridge import registrar_evento_bridge
 from gsheets import append_row_safe, utc_now_str, service_account_email
 APP_VERSION = "v1.1"
 LOG_TAB = "Calculadora_Evaluaciones"
