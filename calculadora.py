@@ -10,22 +10,14 @@ import csv
 import pathlib
 import re
 import urllib.parse
+import base64
+import requests
+import time
+import secrets
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Tuple, Optional, Mapping, cast
 import streamlit as st
 import streamlit.components.v1 as components
-import base64
-import requests
-import re as regex
-import re as _re
-from datetime import datetime, timezone
-import time
-import secrets
-import registro
-import importlib
-importlib.reload(registro)
-
-
 
 # Language detection (i18n)
 try:
@@ -149,6 +141,16 @@ except Exception:
     FUNNEL_PROGRESS_TAB = "V3_Funnel_Progress"
     INTEROPERABILITY_TAB = "V3_Interoperability_Log"
 
+# API Client for centralized risk calculation
+try:
+    from risk_calculation import calcular_riesgo_api
+    from api_client import APIClientError
+    API_CLIENT_AVAILABLE = True
+except ImportError:
+    API_CLIENT_AVAILABLE = False
+    APIClientError = Exception  # type: ignore
+    def calcular_riesgo_api(*args, **kwargs) -> None:  # type: ignore
+        return None
 
 def service_account_email() -> str:
     try:
@@ -819,7 +821,7 @@ def _append_row_extended(payload: dict, canal: str, **kw) -> bool:
 
     paid_code = (st.session_state.get("paid_code") or "").strip()
     try:
-        code_ok = bool(regex.fullmatch(r"[A-Za-z0-9]{6,}", paid_code))
+        code_ok = bool(re.fullmatch(r"[A-Za-z0-9]{6,}", paid_code))
     except Exception:
         code_ok = len(paid_code) >= 6  # fallback si no hay regex
 
@@ -2773,6 +2775,8 @@ def calculadora():
 
     cap_score, cap_det = caprini_desde(antecedentes_todos)
     cap_cat = caprini_categoria(cap_score)
+    
+    # Cálculo simple para preview (sin llamada a API, solo visual)
     f = factor_riesgo_fn(edad, bmi, tabaquismo, cap_score)
     nivel = nivel_por_factor(f)
 
@@ -3545,8 +3549,51 @@ def calculadora():
     # --- Cálculo Caprini (usa variables ya definidas arriba) ---
     cap_score, cap_det = caprini_desde(antecedentes_todos)
     cap_cat = caprini_categoria(cap_score)
-    f = factor_riesgo_fn(edad, bmi, tabaquismo, cap_score)
-    nivel = nivel_por_factor(f)
+    
+    # === CENTRALIZADO: Llamada a API para cálculo de riesgo ===
+    if API_CLIENT_AVAILABLE:
+        try:
+            api_resultado = calcular_riesgo_api(
+                edad=edad,
+                peso=peso,
+                altura=altura,
+                tabaquismo=tabaquismo,
+                hipertension=hta_txt,
+                diabetes=diabetes_txt,
+                tiroides=tiroides_txt,
+                caprini_score=cap_score
+            )
+            
+            # Validar que la API respondió correctamente
+            if api_resultado and isinstance(api_resultado, dict):
+                # Usar resultados de la API
+                bmi = api_resultado['bmi']
+                f = api_resultado['factor_riesgo']
+                nivel = api_resultado['nivel_riesgo']
+                api_bmi_cat = api_resultado.get('bmi_categoria', '')
+                
+                safe_log("API evaluation success", bmi=bmi, nivel=nivel, factor=f)
+            else:
+                raise ValueError("API retornó None o respuesta inválida")
+            
+        except APIClientError as e:
+            st.warning(f"⚠️ API no disponible: {e}")
+            st.info("🔄 Usando cálculo local como fallback...")
+            # Fallback: Cálculo local
+            f = factor_riesgo_fn(edad, bmi, tabaquismo, cap_score)
+            nivel = nivel_por_factor(f)
+            safe_log("API error, using local fallback", error=str(e))
+        except Exception as e:
+            st.error(f"❌ Error inesperado: {e}")
+            # Fallback: Cálculo local
+            f = factor_riesgo_fn(edad, bmi, tabaquismo, cap_score)
+            nivel = nivel_por_factor(f)
+            safe_log("Unexpected error, using local fallback", error=str(e))
+    else:
+        # API no disponible, usar cálculo local
+        st.info("ℹ️ API cliente no disponible, usando cálculo local")
+        f = factor_riesgo_fn(edad, bmi, tabaquismo, cap_score)
+        nivel = nivel_por_factor(f)
 
     payload = {
         "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
@@ -3827,7 +3874,7 @@ def calculadora():
 
         dest = (phone_input or st.session_state.get("whatsapp_phone")
                 or "").strip()
-        is_valid_phone = bool(regex.fullmatch(r"^\+?[1-9]\d{7,14}$", dest))
+        is_valid_phone = bool(re.fullmatch(r"^\+?[1-9]\d{7,14}$", dest))
 
         # 2) Construir link de WhatsApp
         ref = st.session_state.get("sess_ref") or _ensure_session_ref()
@@ -3965,7 +4012,7 @@ def calculadora():
     paid_code = (st.session_state.get("paid_code") or "").strip()
 
     # MP requiere código de 6+ alfanuméricos
-    code_ok = bool(regex.fullmatch(r"[A-Za-z0-9]{6,}", paid_code))
+    code_ok = bool(re.fullmatch(r"[A-Za-z0-9]{6,}", paid_code))
 
     pay_ok = bool(st.session_state.get("pay_ok"))  # MP (checkbox)
     zelle_ok = bool(st.session_state.get("zelle_ok"))  # Zelle (checkbox)
@@ -4056,8 +4103,6 @@ def calculadora():
             substage="created"
         )
         st.session_state["pdf_generation_logged"] = True
-        # 🔥 Registro del funnel: FORM COMPLETED
-        registro.registrar_evento_funnel(**st.session_state)
 
     # === Descargar informe final ===
     st.markdown('<div id="section-download"></div>', unsafe_allow_html=True)
