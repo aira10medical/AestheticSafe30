@@ -4051,6 +4051,8 @@ def calculadora():
             substage="created"
         )
         st.session_state["pdf_generation_logged"] = True
+        # 🔥 Registro del funnel: FORM COMPLETED
+        registro.registrar_evento_funnel(**st.session_state)
 
     # === Descargar informe final ===
     st.markdown('<div id="section-download"></div>', unsafe_allow_html=True)
