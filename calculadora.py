@@ -21,6 +21,8 @@ import re as _re
 from datetime import datetime, timezone
 import time
 import secrets
+import registro
+
 
 # Language detection (i18n)
 try:
