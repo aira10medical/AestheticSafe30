@@ -1,6 +1,6 @@
 # registro.py
-# Módulo aislado para registrar actividad del FUNNEL V3 en Google Sheets.
-# No depende de Streamlit. No modifica calculadora.py. No rompe nada.
+# Módulo oficial y definitivo para registrar eventos del FUNNEL V3 y de interoperabilidad.
+# 100% compatible con tus Google Sheets reales. No toca calculadora.py.
 
 import os
 import json
@@ -8,110 +8,149 @@ import gspread
 from google.oauth2.service_account import Credentials
 from datetime import datetime
 
-# -------- CONFIG --------
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive",
 ]
 
 SHEET_KEY = "12PC1-vv-RIPDDs0O07Xg0ZoAFH7H6npJSnDDpUtPkJQ"
-TAB_FUNNEL = "V3_Funnel_Progress"   # <-- pestaña oficial del funnel
+
+TAB_FUNNEL = "V3_Funnel_Progress"
+TAB_INTEROP = "V3_Interoperability_Log"
 
 
-# -------- HELPERS --------
-def now_str():
-    """Timestamp UTC."""
+def _utc():
     return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
 
-def get_creds():
-    """Carga credenciales desde GOOGLE_CREDENTIALS."""
-    creds_json = os.getenv("GOOGLE_CREDENTIALS")
-    if not creds_json:
+def _creds():
+    raw = os.getenv("GOOGLE_CREDENTIALS")
+    if not raw:
         return None, None
-
     try:
-        info = json.loads(creds_json)
+        info = json.loads(raw)
         creds = Credentials.from_service_account_info(info, scopes=SCOPES)
-        svc = info.get("client_email")
-        return creds, svc
+        return creds, info.get("client_email", None)
     except:
         return None, None
 
 
-def open_sheet():
-    """Devuelve worksheet o (None, svc_email)."""
-    creds, svc = get_creds()
+def _open(tab_name):
+    creds, svc = _creds()
     if not creds:
         return None, svc
-
     try:
         gc = gspread.authorize(creds)
-        ss = gc.open_by_key(SHEET_KEY)
-        ws = ss.worksheet(TAB_FUNNEL)
-        return ws, svc
+        sh = gc.open_by_key(SHEET_KEY)
+        return sh.worksheet(tab_name), svc
     except:
         return None, svc
 
 
-# -------- FUNCIÓN PRINCIPAL --------
-def registrar_evento(session_id: str,
-                     stage: str,
-                     substage: str = "",
-                     user_agent: str = "",
-                     country: str = "",
-                     extra: dict = None):
+# -------------------------------------------------------------------
+# 🔵 1. REGISTRO EN V3_Funnel_Progress
+# -------------------------------------------------------------------
+FUNNEL_HEADERS = [
+    "Timestamp",
+    "satisfaction_step1",
+    "satisfaction_step1_comment",
+    "satisfaction_step2",
+    "satisfaction_step2_comment",
+    "session_id",
+    "user_agent",
+    "country",
+    "doctor_email",
+    "stage",
+    "substage",
+    "last_contact_at",
+    "next_contact_at",
+    "contact_attempts",
+    "sequence_name",
+    "wa_template",
+    "app_version",
+    "idioma_ui",
+    "logo_fade_triggered",
+    "scroll_events",
+]
+
+
+def registrar_evento_funnel(**data):
     """
-    Registra un evento único del funnel.
-    Nunca crashea.
-    Devuelve (ok, service_email).
+    Recibe TODA la session_state de calculadora.py como **kwargs.
+    Extrae solo lo que existe en el sheet.
+    No crashea nunca.
     """
 
-    ws, svc = open_sheet()
+    ws, svc = _open(TAB_FUNNEL)
     if not ws:
         return False, svc
 
-    fila = [
-        now_str(),      # timestamp
-        session_id,     # id de la sesión
-        stage,          # step principal: step1, feedback, done...
-        substage,       # substep o detalle
-        user_agent,     # opcional
-        country,        # opcional
-    ]
+    row = [_utc()]  # Timestamp
 
-    # Extra fields JSON
-    try:
-        fila.append(json.dumps(extra) if extra else "")
-    except:
-        fila.append("")
+    for h in FUNNEL_HEADERS[1:]:
+        row.append(data.get(h, ""))
 
     try:
-        ws.append_row(fila, value_input_option="USER_ENTERED")
+        ws.append_row(row, value_input_option="USER_ENTERED")
         return True, svc
     except:
         return False, svc
 
 
-# -------- ADAPTADOR PARA calculadora.py --------
-def registrar_evento_funnel(**kwargs):
+# -------------------------------------------------------------------
+# 🔵 2. REGISTRO EN V3_Interoperability_Log
+# -------------------------------------------------------------------
+INTEROP_HEADERS = [
+    "Timestamp",
+    "Request_Data",
+    "Response_Data",
+    "App_Version",
+    "Browser_Lang",
+    "Idioma_Detected",
+    "Session_ID",
+    "User_Agent",
+    "Country",
+    "Stage",
+    "Substage",
+]
+
+
+def registrar_evento_interop(
+    request_data: dict,
+    response_data: dict,
+    app_version: str,
+    browser_lang: str,
+    idioma_detected: bool,
+    session_id: str,
+    user_agent: str,
+    country: str,
+    stage: str,
+    substage: str,
+):
     """
-    Adaptador compatible con calculadora.py.
-    Toma session_state y extrae solo lo que necesita registrar_evento().
+    Inserta EXACTAMENTE en el sheet V3_Interoperability_Log siguiendo tus columnas reales.
     """
 
-    session_id  = kwargs.get("sess_id", "")
-    stage       = kwargs.get("stage", "")
-    substage    = kwargs.get("substage", "")
-    user_agent  = kwargs.get("user_agent", "")
-    country     = kwargs.get("country", "")
-    extra       = kwargs
+    ws, svc = _open(TAB_INTEROP)
+    if not ws:
+        return False, svc
 
-    return registrar_evento(
-        session_id=session_id,
-        stage=stage,
-        substage=substage,
-        user_agent=user_agent,
-        country=country,
-        extra=extra,
-    )
+    row = [
+        _utc(),
+        json.dumps(request_data),
+        json.dumps(response_data),
+        app_version,
+        browser_lang,
+        idioma_detected,
+        session_id,
+        user_agent,
+        country,
+        stage,
+        substage,
+    ]
+
+    try:
+        ws.append_row(row, value_input_option="USER_ENTERED")
+        return True, svc
+    except:
+        return False, svc
