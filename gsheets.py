@@ -1,6 +1,7 @@
 # gsheets.py — utilidades robustas para Google Sheets (descarta eventos cortos)
 import json
 import os
+import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -14,6 +15,35 @@ SHEET_KEY = "12PC1-vv-RIPDDs0O07Xg0ZoAFH7H6npJSnDDpUtPkJQ"
 # Pestaña de envío final (la grande)
 LOG_TAB_TITLE = "Calculadora_Evaluaciones"
 LOG_TAB_GID = 1211408350  # gid de esa pestaña
+
+# Pestañas para AestheticSafe V3 (Octubre 2025)
+INTEROPERABILITY_TAB = "V3_Interoperability_Log"
+FUNNEL_PROGRESS_TAB = "V3_Funnel_Progress"
+EVALUACIONES_TAB = "V3_Calculadora_Evaluaciones"
+
+# Headers for V3 sheets
+INTEROPERABILITY_HEADERS = [
+    "Timestamp", "Request_Data", "Response_Data", "App_Version", 
+    "Browser_Lang", "Idioma_Detected", "Session_ID", "User_Agent", 
+    "Country", "Stage", "Substage"
+]
+
+FUNNEL_PROGRESS_HEADERS = [
+    "Timestamp", "satisfaction_step1", "satisfaction_step1_comment",
+    "satisfaction_step2", "satisfaction_step2_comment", "session_id",
+    "user_agent", "country", "doctor_email", "stage", "substage",
+    "last_contact_at", "next_contact_at", "contact_attempts",
+    "sequence_name", "wa_template", "app_version", "idioma_ui", 
+    "logo_fade_triggered", "scroll_events"
+]
+
+EVALUACIONES_HEADERS = [
+    "Timestamp", "session_id", "email", "phone", "edad", "peso", "altura",
+    "imc", "tabaquismo", "hipertension", "diabetes", "tiroides",
+    "caprini_score", "risk_level", "recomendaciones", "app_version",
+    "idioma_ui", "pdf_generated", "pdf_sent", "payment_method", "share_method",
+    "doctor_shared_email", "shared_role", "verification_uuid"
+]
 
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -64,6 +94,32 @@ def _open_sheet_and_tab(tab_title: str = LOG_TAB_TITLE, tab_gid: Optional[int] =
             ws = sh.worksheet(tab_title)
         except gspread.WorksheetNotFound:
             ws = sh.add_worksheet(title=tab_title, rows=2000, cols=50)
+            
+            # Initialize headers for new feedback sheets - write directly to row 1
+            if tab_title == INTEROPERABILITY_TAB:
+                try:
+                    ws.update(range_name="A1", values=[INTEROPERABILITY_HEADERS])
+                except Exception:
+                    pass  # If headers fail, append_row_safe will handle empty headers
+            elif tab_title == FUNNEL_PROGRESS_TAB:
+                try:
+                    ws.update(range_name="A1", values=[FUNNEL_PROGRESS_HEADERS])
+                except Exception:
+                    pass
+    
+    # Ensure existing sheets have headers
+    if ws and tab_title in (INTEROPERABILITY_TAB, FUNNEL_PROGRESS_TAB):
+        try:
+            headers = ws.row_values(1)
+            if not headers or all(not h for h in headers):
+                # Sheet exists but has no headers - write directly to row 1
+                if tab_title == INTEROPERABILITY_TAB:
+                    ws.update(range_name="A1", values=[INTEROPERABILITY_HEADERS])
+                elif tab_title == FUNNEL_PROGRESS_TAB:
+                    ws.update(range_name="A1", values=[FUNNEL_PROGRESS_HEADERS])
+        except Exception:
+            pass  # Continue even if header check/init fails
+            
     return ws, svc_email
 
 def append_row_safe(row: List[Any], tab: str = LOG_TAB_TITLE, tab_gid: Optional[int] = LOG_TAB_GID) -> Tuple[bool, Optional[str]]:
@@ -116,7 +172,7 @@ def append_row_safe(row: List[Any], tab: str = LOG_TAB_TITLE, tab_gid: Optional[
                 elif len(values) > n:
                     values = values[:n]
 
-            ws.append_row(values, value_input_option="USER_ENTERED")
+            ws.append_row(values)
             return True, svc
 
         except Exception:
@@ -139,3 +195,9 @@ def utc_now_str() -> str:
 def service_account_email() -> Optional[str]:
     _, svc = _load_credentials()
     return svc or ""
+
+
+# ============ AestheticSafe 3.0 - Feedback Logging ============
+
+# Legacy functions removed - use log_to_funnel_progress and log_to_interoperability from calculadora.py
+
