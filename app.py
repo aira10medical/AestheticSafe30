@@ -2,6 +2,8 @@
 # pyright: reportUnusedExpression=false
 
 # app.py — conexión robusta a Google Sheets (Secrets o credentials.json)
+from services.chat_widget import render_chat_widget
+
 import os
 import json
 import streamlit as st
@@ -670,3 +672,6 @@ if __name__ == "__main__":
 else:
     # Si se importa desde otro módulo, renderizar normal
     _render_main()
+    # --- Chat flotante ---
+render_chat_widget()
+
