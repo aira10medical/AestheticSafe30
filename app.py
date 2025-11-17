@@ -247,14 +247,22 @@ LOG_TAB = "Calculadora_Evaluaciones"
 
 def vista_paciente_es():
     
-    # Log funnel step1
+    # Datos base para interoperabilidad
+    request_payload = {
+    "app_version": APP_VERSION,
+    "browser_lang": st.session_state.get("browser_lang", ""),
+    "idioma_detectado": st.session_state.get("idioma", ""),
+    }
+
     registrar_evento_bridge(
-    session_id=st.session_state.get("session_id", "no-session"),
     stage="step1",
     substage="start",
+    session_id=st.session_state.get("session_id", "no-session"),
     user_agent=st.session_state.get("user_agent", ""),
-    country=st.session_state.get("country", "")
+    country=st.session_state.get("country", ""),
+    extra=request_payload
     )
+
 
     st.header("Evaluación Estética - SAFE MD 25")
     st.markdown(
