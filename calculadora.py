@@ -22,6 +22,9 @@ from datetime import datetime, timezone
 import time
 import secrets
 import registro
+import importlib
+importlib.reload(registro)
+
 
 
 # Language detection (i18n)
