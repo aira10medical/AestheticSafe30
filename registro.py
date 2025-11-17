@@ -90,3 +90,4 @@ def registrar_evento(session_id: str,
         return True, svc
     except:
         return False, svc
+        
