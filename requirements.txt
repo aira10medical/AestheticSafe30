@@ -11,3 +11,4 @@ requests
 sendgrid
 qrcode
 pillow
+openai>=1.40.0
