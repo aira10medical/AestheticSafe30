@@ -3,6 +3,7 @@
 
 # app.py — conexión robusta a Google Sheets (Secrets o credentials.json)
 from services.chat_widget import render_chat_widget
+from services.openai_client import ask_openai
 
 import os
 import json
@@ -14,19 +15,6 @@ from logger_bridge import registrar_evento_bridge
 from gsheets import append_row_safe, utc_now_str, service_account_email
 APP_VERSION = "v1.1"
 LOG_TAB = "Calculadora_Evaluaciones"
-from openai import OpenAI
-import os
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-def obtener_respuesta_ia(pregunta):
-    response = client.responses.create(
-        model="gpt-5.1-mini",
-        input=pregunta
-    )
-    return response.output_text
-
-
 def vista_calculadora_pi():
     calculadora()  # <-- solo llama a calculadora(), sin título duplicado
 
@@ -579,19 +567,17 @@ def vista_paciente_es():
         if not pregunta_ia.strip():
             st.warning("Por favor escribí una pregunta antes de continuar.")
         else:
-            with st.spinner("Consultando a GPT-5.1-mini..."):
+            with st.spinner("Consultando al asistente IA..."):
                 try:
-                    respuesta = client.responses.create(
-                        model="gpt-5.1-mini",
-                        input=(
-                            "Actúa como un asistente médico experto en cirugía plástica estética. "
-                            "Proporciona respuestas claras, concisas, en español, "
-                            "y evita cualquier acto médico directo.\n\n"
-                            f"Pregunta del usuario: {pregunta_ia}"
-                        )
+                    prompt = (
+                        "Actúa como un asistente médico experto en cirugía plástica estética. "
+                        "Proporciona respuestas claras, concisas, en español, "
+                        "y evita cualquier acto médico directo.\n\n"
+                        f"Pregunta del usuario: {pregunta_ia}"
                     )
+                    respuesta = ask_openai(prompt)
                     st.success("Respuesta del asistente:")
-                    st.write(respuesta.output_text)
+                    st.write(respuesta)
 
                 except Exception as e:
                     st.error(
